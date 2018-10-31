@@ -5,6 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private List<Pessoa> listPessoa = new ArrayList<Pessoa>();
     private ArrayAdapter<Pessoa> arrayAdapterPessoa;
 
+    Pessoa pessoaSelecionada;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,15 @@ public class MainActivity extends AppCompatActivity {
 
         inicializarFirebase();
         eventoDatabase();
+
+        listV_dados.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                pessoaSelecionada = (Pessoa)parent.getItemAtPosition(position);
+                editName.setText(pessoaSelecionada.getNome());
+                editEmail.setText(pessoaSelecionada.getEmail());
+            }
+        });
     }
 
     private void eventoDatabase() {
@@ -87,6 +99,17 @@ public class MainActivity extends AppCompatActivity {
             p.setNome(editName.getText().toString());
             p.setEmail(editEmail.getText().toString());
             databaseReference.child("Pessoa").child(p.getUid()).setValue(p);
+            limparCampos();
+        } else if (id == R.id.menu_atualiza) {
+            Pessoa p = new Pessoa();
+            p.setUid(pessoaSelecionada.getUid());
+            p.setNome(editName.getText().toString().trim());
+            p.setEmail(editEmail.getText().toString().trim());
+            databaseReference.child("Pessoa").child(p.getUid()).setValue(p);
+        } else if (id == R.id.menu_deleta){
+            Pessoa p = new Pessoa();
+            p.setUid(pessoaSelecionada.getUid());
+            databaseReference.child("Pessoa").child(p.getUid()).removeValue();
             limparCampos();
         }
         return true;
